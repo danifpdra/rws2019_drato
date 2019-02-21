@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<!-- -->
-<launch>
-<node name="drato" pkg="player_drato" type="player_drato_node" respawn="true">
-</launch>
