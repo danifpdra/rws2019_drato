@@ -165,7 +165,7 @@ main(int argc, char *argv[])
 {
 
     ros::init(argc, argv, "drato");
-    drato_ns::MyPlayer player("moliveira", "blue");
+    drato_ns::MyPlayer player("drato", "blue");
     ros::NodeHandle n;
     // string player_name = "drato";
     // player.setTeamName("blue");
