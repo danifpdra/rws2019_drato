@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<!-- -->
+<launch>
+    <rosparam command="load" file="$(find player_drato)/param/param.yaml"/>
+    <node name="drato" pkg="player_drato" type="node" respawn="true" output="screen"/>
+</launch>
