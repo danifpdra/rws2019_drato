@@ -189,6 +189,52 @@ public:
     ROS_INFO_STREAM("I am hunting " << team_preys->team_name << " and fleeing from " << team_hunters->team_name);
   }
 
+  float getDistanceToCenter()
+  {
+    tf::StampedTransform T0;
+
+    try
+    {
+      listener.lookupTransform("/world", player_name, ros::Time(0), T0);
+    }
+    catch (tf::TransformException ex)
+    {
+      ROS_ERROR("%s", ex.what());
+      ros::Duration(0.1).sleep();
+    }
+
+    double x = T0.getOrigin().x();
+    double y = T0.getOrigin().y();
+    double dist = sqrt(x * x + y * y);
+
+    return dist;
+  }
+
+  std::tuple<float,float> getDistanceAndAngleToPlayer(string player_to_get_distance)
+  {
+    tf::StampedTransform T0;
+
+    try
+    {
+      listener.lookupTransform(player_name, player_to_get_distance, ros::Time(0), T0);
+    }
+    catch (tf::TransformException ex)
+    {
+      ROS_ERROR("%s", ex.what());
+      ros::Duration(0.01).sleep();
+      return {1000,0};
+    }
+
+    float x = T0.getOrigin().x();
+    float y = T0.getOrigin().y();
+    float dist = sqrt(x * x + y * y);
+    float ang= atan2(y,x);
+
+    return {dist,ang};
+  }
+
+  
+
   void makeAPlayCallback(rws2019_msgs::MakeAPlayConstPtr msg)
   {
     ROS_INFO("received a new msg");
@@ -206,8 +252,33 @@ public:
     }
 
     // Step 2: Define local movement
-    float dx = 0.5;
-    float a = -M_PI;
+
+    // for each prey, find the closest. Then, follow it
+    vector<float> distance_to_preys;
+    vector<float> angle_to_preys;
+
+
+    for (size_t i = 0; i < team_preys->player_names.size(); i++)
+    {
+      ROS_WARN_STREAM("team_preys = " << team_preys->player_names[i]);
+      std::tuple<float,float> t=getDistanceAndAngleToPlayer(team_preys->player_names[i]);
+      distance_to_preys.push_back(std::get<0>(t));
+      angle_to_preys.push_back(std::get<1>(t));
+    }
+
+    int idx_closest_prey = 0;
+    float distance_closest_prey = 10000;
+    for (size_t i = 0; i < team_preys->player_names.size(); i++)
+    {
+      if (distance_to_preys[i] < distance_closest_prey)
+      {
+        idx_closest_prey = i;
+        distance_closest_prey = distance_to_preys[i];
+      }
+    }
+
+    float dx = 10;
+    float a = angle_to_preys[idx_closest_prey];
 
     // Step 2.5 : ckeck values
     float dx_max = msg->turtle;
@@ -254,13 +325,6 @@ main(int argc, char *argv[])
   drato_ns::MyPlayer player("drato", "blue");
   ros::NodeHandle n;
 
-  // string player_name = "drato";
-  // player.setTeamName("blue");
-  // player.setTeamName(2);
-  // cout << "Hello world from " << player.player_name << " of team " << player.getTeamName() << endl;
-  // drato_ns::Team team_blue("blue");
-  // team_blue.player_names.push_back("drato");
-
   ros::Subscriber sub = n.subscribe("/make_a_play", 100, &drato_ns::MyPlayer::makeAPlayCallback, &player);
 
   player.printInfo();
@@ -268,11 +332,6 @@ main(int argc, char *argv[])
 
   while (ros::ok())
   {
-    // cout << "Created an instance of class player with public name " << player_name << " of team " <<
-    // player.getTeamName() << endl; team_blue.printInfo(); cout << "drato belongs to team? " <<
-    // team_blue.playerBelongsToTeam("drato") << endl;
-    // ros::Duration(0.1).sleep();
-
     ros::spinOnce();
     r.sleep();
   }
@@ -280,7 +339,6 @@ main(int argc, char *argv[])
   return 0;
 }
 
-
-//por jogador a preseguir alguem e a fugir de alguem
-//ver presas e calcular distancias
-//escolher presa mais proxima e preseguir 
+// por jogador a preseguir alguem e a fugir de alguem
+// ver presas e calcular distancias
+// escolher presa mais proxima e preseguir
