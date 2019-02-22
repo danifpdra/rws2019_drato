@@ -202,7 +202,7 @@ public:
 
     // Step 2: Define local movement
     float dx = 0.5;
-    float a = M_PI / 6;
+    float a = -M_PI;
 
     // Step 2.5 : ckeck values
     float dx_max = msg->turtle;
