@@ -74,7 +74,7 @@ public:
   string player_name;
 
   // Methods
-  Player(string player_name_in)  // constructor
+  Player(string player_name_in) // constructor
   {
     player_name = player_name_in;
   };
@@ -201,7 +201,7 @@ public:
     {
       ROS_ERROR("%s", ex.what());
       ros::Duration(0.01).sleep();
-      return { 1000, 0 };
+      return {1000, 0};
     }
 
     float x = T0.getOrigin().x();
@@ -209,7 +209,7 @@ public:
     float dist = sqrt(x * x + y * y);
     float ang = atan2(y, x);
 
-    return { dist, ang };
+    return {dist, ang};
   }
 
   std::tuple<float, float> getDistanceAndAngleToArena(string player_to_get_distance)
@@ -233,6 +233,19 @@ public:
       ros::Duration(0.1).sleep();
     }
 
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = player_name;
+    marker.header.stamp = ros::Time();
+    marker.ns = player_name;
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.pose.position.y = 0.5;
+    marker.scale.z = 0.3;
+    marker.color.a = 1.0; // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 0.0;
     // Step 2: Define local movement
 
     // for each prey, find the closest. Then, follow it
@@ -241,7 +254,7 @@ public:
 
     for (size_t i = 0; i < msg->red_alive.size(); i++)
     {
-      ROS_WARN_STREAM("team_preys = " << msg->red_alive[i]);
+      // ROS_WARN_STREAM("team_preys = " << msg->red_alive[i]);
       std::tuple<float, float> t = getDistanceAndAngleToPlayer(msg->red_alive[i]);
       distance_to_preys.push_back(std::get<0>(t));
       angle_to_preys.push_back(std::get<1>(t));
@@ -258,8 +271,47 @@ public:
       }
     }
 
+    //hunters
+    vector<float> distance_to_hunters;
+    vector<float> angle_to_hunters;
+
+    for (size_t i = 0; i < msg->green_alive.size(); i++)
+    {
+      std::tuple<float, float> t_hunt = getDistanceAndAngleToPlayer(msg->green_alive[i]);
+      distance_to_hunters.push_back(std::get<0>(t_hunt));
+      angle_to_hunters.push_back(std::get<1>(t_hunt));
+    }
+
+    int idx_closest_hunters = 0;
+    float distance_closest_hunters = 10000;
+    for (size_t i = 0; i < team_hunters->player_names.size(); i++)
+    {
+      if (distance_to_hunters[i] < distance_closest_hunters)
+      {
+        idx_closest_hunters = i;
+        distance_closest_hunters = distance_to_hunters[i];
+      }
+    }
+
+    float a;
+    if (distance_closest_hunters > 1)
+    {
+      a = angle_to_hunters[idx_closest_hunters]+M_PI;
+      marker.text = "RUNNING FROM " + team_hunters->player_names[idx_closest_hunters] + "!!!";
+    }
+    else
+    {
+      a = angle_to_preys[idx_closest_prey];
+      marker.text = "RUN " + team_preys->player_names[idx_closest_prey] + "!!!";
+    }
+
+    std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
+    if (std::get<0>(t2) > 5.5)
+    {
+      a = a + M_PI;
+    }
+
     float dx = 10;
-    float a = angle_to_preys[idx_closest_prey];
 
     // Step 2.5 : ckeck values
     float dx_max = msg->turtle;
@@ -269,11 +321,6 @@ public:
     fabs(a) > fabs(a_max) ? a = a_max * a / fabs(a) : a = a;
 
     // change direction in case of leaving the arena
-    std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
-    if (std::get<0>(t2) > 5.5)
-    {
-      a = a + M_PI/10;
-    }
 
     // Step 3: Move
     tf::Transform T1;
@@ -286,27 +333,13 @@ public:
     tf::Transform Tg = T0 * T1;
     br.sendTransform(tf::StampedTransform(Tg, ros::Time::now(), "world", player_name));
 
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = player_name;
-    marker.header.stamp = ros::Time();
-    marker.ns = player_name;
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.y = 0.5;
-    marker.scale.z = 0.3;
-    marker.color.a = 1.0;  // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-    marker.text = "RUN " + team_preys->player_names[idx_closest_prey] + "!!!";
     vis_pub->publish(marker);
   }
 
 private:
 };
 
-}  // namespace drato_ns
+} // namespace drato_ns
 
 main(int argc, char *argv[])
 {
@@ -327,7 +360,3 @@ main(int argc, char *argv[])
 
   return 0;
 }
-
-// por jogador a preseguir alguem e a fugir de alguem
-// ver presas e calcular distancias
-// escolher presa mais proxima e preseguir
