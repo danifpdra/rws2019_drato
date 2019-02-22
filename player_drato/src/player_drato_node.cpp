@@ -134,7 +134,7 @@ public:
     team_blue = (boost::shared_ptr<Team>)new Team("blue");
     ros::NodeHandle n;
     vis_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
-    (*vis_pub) = n.advertise<visualization_msgs::Marker>("player_names", 0);
+    (*vis_pub) = n.advertise<visualization_msgs::Marker>("/bocas", 0);
 
     team_red->printInfo();
     team_green->printInfo();
@@ -268,6 +268,13 @@ public:
     double a_max = M_PI / 30;
     fabs(a) > fabs(a_max) ? a = a_max * a / fabs(a) : a = a;
 
+    // change direction in case of leaving the arena
+    std::tuple<float, float> t = getDistanceAndAngleToArena(player_name);
+    if (std::get<0>(t) > 6)
+    {
+      a = std::get<1>(t) + M_PI;
+    }
+
     // Step 3: Move
     tf::Transform T1;
     T1.setOrigin(tf::Vector3(dx, 0, 0.0));
@@ -286,12 +293,13 @@ public:
     marker.id = 0;
     marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
     marker.action = visualization_msgs::Marker::ADD;
-    marker.scale.z = 0.6;
+    marker.pose.position.y = 0.5;
+    marker.scale.z = 0.3;
     marker.color.a = 1.0;  // Don't forget to set the alpha!
     marker.color.r = 0.0;
     marker.color.g = 0.0;
-    marker.color.b = 1.0;
-    marker.text = player_name;
+    marker.color.b = 0.0;
+    marker.text = "RUN!!!";
     vis_pub->publish(marker);
   }
 
