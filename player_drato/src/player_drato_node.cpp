@@ -13,6 +13,7 @@
 #include <rws2019_msgs/MakeAPlay.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
+#include <visualization_msgs/Marker.h>
 #include <iostream>
 #include <vector>
 
@@ -110,7 +111,6 @@ public:
 
 private:
   string team_name = "";
-  //     int a;
 };
 
 class MyPlayer : public Player
@@ -124,6 +124,7 @@ class MyPlayer : public Player
 
   tf::TransformBroadcaster br;
   tf::TransformListener listener;
+  boost::shared_ptr<ros::Publisher> vis_pub;
 
 public:
   MyPlayer(string player_name_in, string team_name_in) : Player(player_name_in)
@@ -131,6 +132,9 @@ public:
     team_red = (boost::shared_ptr<Team>)new Team("red");
     team_green = (boost::shared_ptr<Team>)new Team("green");
     team_blue = (boost::shared_ptr<Team>)new Team("blue");
+    ros::NodeHandle n;
+    vis_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
+    (*vis_pub) = n.advertise<visualization_msgs::Marker>("player_names", 0);
 
     team_red->printInfo();
     team_green->printInfo();
@@ -172,6 +176,7 @@ public:
     // Step 4: Define global movement
     tf::Transform Tg = T1;
     br.sendTransform(tf::StampedTransform(Tg, ros::Time::now(), "world", player_name));
+
     ros::Duration(0.1).sleep();
 
     setTeamName(team_mine->team_name);
@@ -221,6 +226,21 @@ public:
     // Step 4: Define global movement
     tf::Transform Tg = T0 * T1;
     br.sendTransform(tf::StampedTransform(Tg, ros::Time::now(), "world", player_name));
+
+    visualization_msgs::Marker marker;
+    marker.header.frame_id = player_name;
+    marker.header.stamp = ros::Time();
+    marker.ns = player_name;
+    marker.id = 0;
+    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    marker.action = visualization_msgs::Marker::ADD;
+    marker.scale.z = 0.6;
+    marker.color.a = 1.0;  // Don't forget to set the alpha!
+    marker.color.r = 0.0;
+    marker.color.g = 0.0;
+    marker.color.b = 1.0;
+    marker.text = player_name;
+    vis_pub->publish(marker);
   }
 
 private:
@@ -240,7 +260,6 @@ main(int argc, char *argv[])
   // cout << "Hello world from " << player.player_name << " of team " << player.getTeamName() << endl;
   // drato_ns::Team team_blue("blue");
   // team_blue.player_names.push_back("drato");
-  // team_blue.player_names.push_back("blourenco");
 
   ros::Subscriber sub = n.subscribe("/make_a_play", 100, &drato_ns::MyPlayer::makeAPlayCallback, &player);
 
@@ -260,3 +279,8 @@ main(int argc, char *argv[])
 
   return 0;
 }
+
+
+//por jogador a preseguir alguem e a fugir de alguem
+//ver presas e calcular distancias
+//escolher presa mais proxima e preseguir 
