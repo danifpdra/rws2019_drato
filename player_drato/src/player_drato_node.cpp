@@ -189,28 +189,7 @@ public:
     ROS_INFO_STREAM("I am hunting " << team_preys->team_name << " and fleeing from " << team_hunters->team_name);
   }
 
-  float getDistanceToCenter()
-  {
-    tf::StampedTransform T0;
-
-    try
-    {
-      listener.lookupTransform("/world", player_name, ros::Time(0), T0);
-    }
-    catch (tf::TransformException ex)
-    {
-      ROS_ERROR("%s", ex.what());
-      ros::Duration(0.1).sleep();
-    }
-
-    double x = T0.getOrigin().x();
-    double y = T0.getOrigin().y();
-    double dist = sqrt(x * x + y * y);
-
-    return dist;
-  }
-
-  std::tuple<float,float> getDistanceAndAngleToPlayer(string player_to_get_distance)
+  std::tuple<float, float> getDistanceAndAngleToPlayer(string player_to_get_distance)
   {
     tf::StampedTransform T0;
 
@@ -222,18 +201,21 @@ public:
     {
       ROS_ERROR("%s", ex.what());
       ros::Duration(0.01).sleep();
-      return {1000,0};
+      return { 1000, 0 };
     }
 
     float x = T0.getOrigin().x();
     float y = T0.getOrigin().y();
     float dist = sqrt(x * x + y * y);
-    float ang= atan2(y,x);
+    float ang = atan2(y, x);
 
-    return {dist,ang};
+    return { dist, ang };
   }
 
-  
+  std::tuple<float, float> getDistanceAndAngleToArena(string player_to_get_distance)
+  {
+    getDistanceAndAngleToPlayer("world");
+  }
 
   void makeAPlayCallback(rws2019_msgs::MakeAPlayConstPtr msg)
   {
@@ -257,11 +239,10 @@ public:
     vector<float> distance_to_preys;
     vector<float> angle_to_preys;
 
-
     for (size_t i = 0; i < team_preys->player_names.size(); i++)
     {
       ROS_WARN_STREAM("team_preys = " << team_preys->player_names[i]);
-      std::tuple<float,float> t=getDistanceAndAngleToPlayer(team_preys->player_names[i]);
+      std::tuple<float, float> t = getDistanceAndAngleToPlayer(team_preys->player_names[i]);
       distance_to_preys.push_back(std::get<0>(t));
       angle_to_preys.push_back(std::get<1>(t));
     }
