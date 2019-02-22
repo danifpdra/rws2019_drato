@@ -239,10 +239,10 @@ public:
     vector<float> distance_to_preys;
     vector<float> angle_to_preys;
 
-    for (size_t i = 0; i < team_preys->player_names.size(); i++)
+    for (size_t i = 0; i < msg->red_alive.size(); i++)
     {
-      ROS_WARN_STREAM("team_preys = " << team_preys->player_names[i]);
-      std::tuple<float, float> t = getDistanceAndAngleToPlayer(team_preys->player_names[i]);
+      ROS_WARN_STREAM("team_preys = " << msg->red_alive[i]);
+      std::tuple<float, float> t = getDistanceAndAngleToPlayer(msg->red_alive[i]);
       distance_to_preys.push_back(std::get<0>(t));
       angle_to_preys.push_back(std::get<1>(t));
     }
@@ -269,10 +269,10 @@ public:
     fabs(a) > fabs(a_max) ? a = a_max * a / fabs(a) : a = a;
 
     // change direction in case of leaving the arena
-    std::tuple<float, float> t = getDistanceAndAngleToArena(player_name);
-    if (std::get<0>(t) > 6)
+    std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
+    if (std::get<0>(t2) > 5.5)
     {
-      a = std::get<1>(t) + M_PI;
+      a = a + M_PI/10;
     }
 
     // Step 3: Move
@@ -299,7 +299,7 @@ public:
     marker.color.r = 0.0;
     marker.color.g = 0.0;
     marker.color.b = 0.0;
-    marker.text = "RUN!!!";
+    marker.text = "RUN " + team_preys->player_names[idx_closest_prey] + "!!!";
     vis_pub->publish(marker);
   }
 
