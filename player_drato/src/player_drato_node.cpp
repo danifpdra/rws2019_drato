@@ -28,6 +28,13 @@ float randomizePosition()
   return (((double)rand() / (RAND_MAX)) - 0.5) * 10;
 }
 
+
+float randomizePosition2()
+{
+  srand(5846 * time(NULL));
+  return (((double)rand() / (RAND_MAX)) - 0.5) * 10;
+}
+
 namespace drato_ns
 {
 class Team
@@ -166,7 +173,7 @@ public:
 
     // define initial position
     float sx = randomizePosition();
-    float sy = randomizePosition();
+    float sy = randomizePosition2();
     tf::Transform T1;
     T1.setOrigin(tf::Vector3(sx, sy, 0.0));
     tf::Quaternion q;
