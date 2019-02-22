@@ -23,8 +23,8 @@ using namespace ros;
 
 float randomizePosition()
 {
-  srand(6832*time(NULL));
-  return(((double)rand()/(RAND_MAX))-0.5)*10;
+  srand(6832 * time(NULL));
+  return (((double)rand() / (RAND_MAX)) - 0.5) * 10;
 }
 
 namespace drato_ns
@@ -161,8 +161,8 @@ public:
     }
 
     // define initial position
-    float sx=randomizePosition();
-    float sy=randomizePosition();
+    float sx = randomizePosition();
+    float sy = randomizePosition();
     tf::Transform T1;
     T1.setOrigin(tf::Vector3(sx, sy, 0.0));
     tf::Quaternion q;
@@ -202,13 +202,20 @@ public:
 
     // Step 2: Define local movement
     float dx = 0.5;
-    float angle = M_PI / 6;
+    float a = M_PI / 6;
+
+    // Step 2.5 : ckeck values
+    float dx_max = msg->turtle;
+    dx > dx_max ? dx = dx_max : dx = dx;
+
+    double a_max = M_PI / 30;
+    fabs(a) > fabs(a_max) ? a = a_max * a / fabs(a) : a = a;
 
     // Step 3: Move
     tf::Transform T1;
     T1.setOrigin(tf::Vector3(dx, 0, 0.0));
     tf::Quaternion q;
-    q.setRPY(0, 0, angle);
+    q.setRPY(0, 0, a);
     T1.setRotation(q);
 
     // Step 4: Define global movement
