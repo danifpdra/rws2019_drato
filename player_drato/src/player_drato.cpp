@@ -114,6 +114,8 @@ class MyPlayer : public Player {
   tf::TransformBroadcaster br;
   tf::TransformListener listener;
   boost::shared_ptr<ros::Publisher> vis_pub;
+  string last_prey;
+  string last_hunter;
 
 public:
   MyPlayer(string player_name_in, string team_name_in)
@@ -164,6 +166,9 @@ public:
 
     setTeamName(team_mine->team_name);
     printInfo();
+
+    last_prey = "";
+    last_hunter = "";
   }
 
   void printInfo() {
@@ -203,6 +208,8 @@ public:
   void makeAPlayCallback(rws2019_msgs::MakeAPlayConstPtr msg) {
     ROS_INFO("received a new msg");
 
+    bool something_change = false;
+
     // Step 1: find out where I am
     tf::StampedTransform T0;
     try {
@@ -212,19 +219,6 @@ public:
       ros::Duration(0.1).sleep();
     }
 
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = player_name;
-    marker.header.stamp = ros::Time();
-    marker.ns = player_name;
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.y = 0.5;
-    marker.scale.z = 0.3;
-    marker.color.a = 1.0; // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
     // Step 2: Define local movement
 
     // for each prey, find the closest. Then, follow it
@@ -239,12 +233,21 @@ public:
       angle_to_preys.push_back(std::get<1>(t));
     }
 
-    int idx_closest_prey = 0;
+    int idx_closest_prey = -1;
     float distance_closest_prey = 10000;
     for (size_t i = 0; i < team_preys->player_names.size(); i++) {
       if (distance_to_preys[i] < distance_closest_prey) {
         idx_closest_prey = i;
         distance_closest_prey = distance_to_preys[i];
+      }
+    }
+
+    // check if last prey is different from prey
+    if (idx_closest_prey != -1) {
+      string prey = msg->red_alive[idx_closest_prey];
+      if (prey != last_prey) {
+        something_change = true;
+        last_prey = prey;
       }
     }
 
@@ -271,11 +274,8 @@ public:
     float a;
     if (distance_closest_hunters > 1) {
       a = angle_to_hunters[idx_closest_hunters] + M_PI;
-      marker.text = "RUNNING FROM " +
-                    team_hunters->player_names[idx_closest_hunters] + "!!!";
     } else {
       a = angle_to_preys[idx_closest_prey];
-      marker.text = "RUN " + team_preys->player_names[idx_closest_prey] + "!!!";
     }
 
     std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
@@ -307,7 +307,32 @@ public:
     br.sendTransform(
         tf::StampedTransform(Tg, ros::Time::now(), "world", player_name));
 
-    vis_pub->publish(marker);
+    if (something_change) {
+      visualization_msgs::Marker marker;
+      marker.header.frame_id = player_name;
+      marker.header.stamp = ros::Time();
+      marker.ns = player_name;
+      marker.id = 0;
+      marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+      marker.action = visualization_msgs::Marker::ADD;
+      marker.pose.position.y = 0.5;
+      marker.scale.z = 0.3;
+      marker.color.a = 1.0; // Don't forget to set the alpha!
+      marker.color.r = 0.0;
+      marker.color.g = 0.0;
+      marker.color.b = 0.0;
+      marker.lifetime = ros::Duration(2);
+      marker.frame_locked=true;
+      if (distance_closest_hunters > 1) {
+        marker.text =
+            "RUNNING FROM " + team_hunters->player_names[idx_closest_hunters];
+      } else {
+        marker.text = "RUN " + team_preys->player_names[idx_closest_prey];
+      }
+
+      vis_pub->publish(marker);
+    }
+
   }
 
 private:
