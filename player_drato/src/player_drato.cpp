@@ -324,7 +324,7 @@ main(int argc, char *argv[]) {
   ros::Subscriber sub = n.subscribe(
       "/make_a_play", 100, &drato_ns::MyPlayer::makeAPlayCallback, &player);
 
-  player.printInfo();
+  // player.printInfo();
   ros::Rate r(20);
 
   while (ros::ok()) {
