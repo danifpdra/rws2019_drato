@@ -20,7 +20,7 @@
 #include <visualization_msgs/Marker.h>
 #include <boost/foreach.hpp>
 #include <iostream>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 
 using namespace std;
