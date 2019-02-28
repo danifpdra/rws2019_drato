@@ -9,7 +9,7 @@
  *
  */
 
-// #include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
 // #include <pcl/point_types.h>
 // #include <pcl_ros/point_cloud.h>
@@ -20,7 +20,7 @@
 #include <visualization_msgs/Marker.h>
 #include <boost/foreach.hpp>
 #include <iostream>
-// #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/highgui/highgui.hpp>
 #include <vector>
 
 using namespace std;
