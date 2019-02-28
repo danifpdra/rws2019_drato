@@ -363,7 +363,7 @@ public:
     std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
     if (std::get<0>(t2) > 7.5)
     {
-      a = a + M_PI;
+      a = a + M_PI/10;
     }
 
     float dx = 10;
