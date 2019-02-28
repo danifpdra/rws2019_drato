@@ -16,6 +16,7 @@
 #include <ros/ros.h>
 #include <rws2019_msgs/DoTheMath.h>
 #include <rws2019_msgs/MakeAPlay.h>
+#include <sound_play/SoundRequest.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
 #include <visualization_msgs/Marker.h>
@@ -141,6 +142,8 @@ class MyPlayer : public Player
   tf::TransformListener listener;
   boost::shared_ptr<ros::Publisher> vis_pub;
 
+  boost::shared_ptr<ros::Publisher> sound_play_pub;
+
 public:
   MyPlayer(string player_name_in, string team_name_in) : Player(player_name_in)
   {
@@ -150,6 +153,9 @@ public:
     ros::NodeHandle n;
     // vis_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
     // (*vis_pub) = n.advertise<visualization_msgs::Marker>("/bocas", 0);
+
+    sound_play_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
+    (*sound_play_pub) = n.advertise<sound_play::SoundRequest>("/robotsound", 10);
 
     team_red->printInfo();
     team_green->printInfo();
@@ -366,6 +372,13 @@ public:
     {
       a = a + M_PI / 10;
     }
+    sound_play::SoundRequest sound_req;
+    sound_req.sound=-3;
+    sound_req.command=1;
+    sound_req.volume=1.0;
+    sound_req.arg="my name is drato, nothing to say";
+    sound_req.arg2="voice_kal_diphone";
+    sound_play_pub->publish(sound_req);
 
     float dx = 10;
 
