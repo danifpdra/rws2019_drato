@@ -147,8 +147,8 @@ public:
     team_green = (boost::shared_ptr<Team>)new Team("green");
     team_blue = (boost::shared_ptr<Team>)new Team("blue");
     ros::NodeHandle n;
-    vis_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
-    (*vis_pub) = n.advertise<visualization_msgs::Marker>("/bocas", 0);
+    // vis_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
+    // (*vis_pub) = n.advertise<visualization_msgs::Marker>("/bocas", 0);
 
     team_red->printInfo();
     team_green->printInfo();
@@ -286,20 +286,20 @@ public:
       ros::Duration(0.1).sleep();
     }
 
-    visualization_msgs::Marker marker;
-    marker.header.frame_id = player_name;
-    marker.header.stamp = ros::Time();
-    marker.ns = player_name;
-    marker.id = 0;
-    marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
-    marker.action = visualization_msgs::Marker::ADD;
-    marker.pose.position.y = 0.5;
-    marker.scale.z = 0.3;
-    marker.color.a = 1.0;  // Don't forget to set the alpha!
-    marker.color.r = 0.0;
-    marker.color.g = 0.0;
-    marker.color.b = 0.0;
-    marker.lifetime = ros::Duration(2);
+    // visualization_msgs::Marker marker;
+    // marker.header.frame_id = player_name;
+    // marker.header.stamp = ros::Time();
+    // marker.ns = player_name;
+    // marker.id = 0;
+    // marker.type = visualization_msgs::Marker::TEXT_VIEW_FACING;
+    // marker.action = visualization_msgs::Marker::ADD;
+    // marker.pose.position.y = 0.5;
+    // marker.scale.z = 0.3;
+    // marker.color.a = 1.0;  // Don't forget to set the alpha!
+    // marker.color.r = 0.0;
+    // marker.color.g = 0.0;
+    // marker.color.b = 0.0;
+    // marker.lifetime = ros::Duration(2);
 
     // Step 2: Define local movement
 
@@ -352,12 +352,12 @@ public:
     if (distance_closest_hunters > 1)
     {
       a = angle_to_hunters[idx_closest_hunters] + M_PI;
-      marker.text = "RUNNING FROM " + team_hunters->player_names[idx_closest_hunters] + "!!!";
+      // marker.text = "RUNNING FROM " + team_hunters->player_names[idx_closest_hunters] + "!!!";
     }
     else
     {
       a = angle_to_preys[idx_closest_prey];
-      marker.text = "RUN " + team_preys->player_names[idx_closest_prey] + "!!!";
+      // marker.text = "RUN " + team_preys->player_names[idx_closest_prey] + "!!!";
     }
 
     std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
@@ -389,7 +389,7 @@ public:
     tf::Transform Tg = T0 * T1;
     br.sendTransform(tf::StampedTransform(Tg, ros::Time::now(), "world", player_name));
 
-    vis_pub->publish(marker);
+    // vis_pub->publish(marker);
   }
 
   /**
@@ -417,7 +417,7 @@ main(int argc, char *argv[])
 
   ros::Subscriber sub = n.subscribe("/make_a_play", 100, &drato_ns::MyPlayer::makeAPlayCallback, &player);
 
-  // player.printInfo();
+  player.printInfo();
   ros::Rate r(20);
 
   // receive images
