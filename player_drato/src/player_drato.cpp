@@ -197,23 +197,23 @@ public:
     printInfo();
   }
 
-  /**
-   * @brief Callback to receive images
-   *
-   * @param msg
-   */
-  void imageCallback(const sensor_msgs::ImageConstPtr &msg)
-  {
-    try
-    {
-      cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
-      cv::waitKey(30);
-    }
-    catch (cv_bridge::Exception &e)
-    {
-      ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
-    }
-  }
+  // /**
+  //  * @brief Callback to receive images
+  //  *
+  //  * @param msg
+  //  */
+  // void imageCallback(const sensor_msgs::ImageConstPtr &msg)
+  // {
+  //   try
+  //   {
+  //     cv::imshow("view", cv_bridge::toCvShare(msg, "bgr8")->image);
+  //     cv::waitKey(30);
+  //   }
+  //   catch (cv_bridge::Exception &e)
+  //   {
+  //     ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+  //   }
+  // }
 
   /**
    * @brief Function to print information
