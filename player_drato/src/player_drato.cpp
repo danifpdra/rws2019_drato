@@ -14,6 +14,7 @@
 // #include <pcl/point_types.h>
 // #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
+#include <rws2019_msgs/DoTheMath.h>
 #include <rws2019_msgs/MakeAPlay.h>
 #include <tf/transform_broadcaster.h>
 #include <tf/transform_listener.h>
@@ -363,7 +364,7 @@ public:
     std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
     if (std::get<0>(t2) > 7.5)
     {
-      a = a + M_PI/10;
+      a = a + M_PI / 10;
     }
 
     float dx = 10;
@@ -404,6 +405,42 @@ public:
   //     printf("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
   // }
 
+  /**
+   * @brief Callback to server process
+   *
+   * @param req
+   * @param res
+   * @return true
+   * @return false
+   */
+  bool doTheMathCallback(rws2019_msgs::DoTheMath::Request &req, rws2019_msgs::DoTheMath::Response &res)
+  {
+    if (req.op == "+")
+    {
+      res.result = req.a + req.b;
+    }
+    else if (req.op == "-")
+    {
+      res.result = req.a - req.b;
+    }
+    else if (req.op == "*")
+    {
+      res.result = req.a * req.b;
+    }
+    else if (req.op == "/")
+    {
+      res.result = req.a / req.b;
+    }
+    else
+    {
+      return false;
+    }
+
+    ROS_INFO("request: x=%ld, y=%ld", (long int)req.a, (long int)req.b);
+    ROS_INFO("sending back response: [%ld]", (long int)res.result);
+    return true;
+  }
+
 private:
 };
 
@@ -420,14 +457,10 @@ main(int argc, char *argv[])
   player.printInfo();
   ros::Rate r(20);
 
-  // receive images
-  // cv::namedWindow("view");
-  // cv::startWindowThread();
-  // image_transport::ImageTransport it(n);
-  // image_transport::Subscriber sub2 = n.subscribe("camera/image", 1, &drato_ns::MyPlayer::imageCallback);
-  // cv::destroyWindow("view");
-
   // ros::Subscriber pcl = n.subscribe<PointCloud>("/object_point_cloud", 1, &drato_ns::MyPlayer::pclcallback, &player);
+
+  ros::ServiceServer service = n.advertiseService("do_the_math", &drato_ns::MyPlayer::doTheMathCallback, &player);
+  ROS_INFO("Ready to do the math!");
 
   while (ros::ok())
   {
