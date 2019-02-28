@@ -9,10 +9,10 @@
  *
  */
 
-#include <cv_bridge/cv_bridge.h>
+// #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
-#include <pcl/point_types.h>
-#include <pcl_ros/point_cloud.h>
+// #include <pcl/point_types.h>
+// #include <pcl_ros/point_cloud.h>
 #include <ros/ros.h>
 #include <rws2019_msgs/MakeAPlay.h>
 #include <tf/transform_broadcaster.h>
@@ -20,7 +20,7 @@
 #include <visualization_msgs/Marker.h>
 #include <boost/foreach.hpp>
 #include <iostream>
-#include <opencv2/highgui/highgui.hpp>
+// #include <opencv2/highgui/highgui.hpp>
 #include <vector>
 
 using namespace std;
@@ -28,7 +28,7 @@ using namespace boost;
 using namespace ros;
 // using namespace cv;
 
-typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+// typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
 float randomizePosition()
 {
@@ -396,13 +396,13 @@ public:
    * @brief callback to point clouds
    *
    * @param msg
-   */
-  void pclcallback(const PointCloud::ConstPtr &msg)
-  {
-    printf("Cloud: width = %d, height = %d\n", msg->width, msg->height);
-    BOOST_FOREACH (const pcl::PointXYZ &pt, msg->points)
-      printf("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
-  }
+  //  */
+  // void pclcallback(const PointCloud::ConstPtr &msg)
+  // {
+  //   printf("Cloud: width = %d, height = %d\n", msg->width, msg->height);
+  //   BOOST_FOREACH (const pcl::PointXYZ &pt, msg->points)
+  //     printf("\t(%f, %f, %f)\n", pt.x, pt.y, pt.z);
+  // }
 
 private:
 };
@@ -427,7 +427,7 @@ main(int argc, char *argv[])
   // image_transport::Subscriber sub2 = n.subscribe("camera/image", 1, &drato_ns::MyPlayer::imageCallback);
   // cv::destroyWindow("view");
 
-  ros::Subscriber pcl = n.subscribe<PointCloud>("/object_point_cloud", 1, &drato_ns::MyPlayer::pclcallback, &player);
+  // ros::Subscriber pcl = n.subscribe<PointCloud>("/object_point_cloud", 1, &drato_ns::MyPlayer::pclcallback, &player);
 
   while (ros::ok())
   {
