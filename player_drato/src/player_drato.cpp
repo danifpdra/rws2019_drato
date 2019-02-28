@@ -137,6 +137,7 @@ class MyPlayer : public Player
   boost::shared_ptr<Team> team_hunters;
   boost::shared_ptr<Team> team_mine;
   boost::shared_ptr<Team> team_preys;
+  boost::shared_ptr<Timer> timer;
 
   tf::TransformBroadcaster br;
   tf::TransformListener listener;
@@ -156,6 +157,9 @@ public:
 
     sound_play_pub = (boost::shared_ptr<ros::Publisher>)new ros::Publisher;
     (*sound_play_pub) = n.advertise<sound_play::SoundRequest>("/robotsound", 10);
+
+    timer = (boost::shared_ptr<ros::Timer>)new ros::Timer;
+    (*timer) = n.createTimer(ros::Duration(5), &MyPlayer::timerCallback,this);
 
     team_red->printInfo();
     team_green->printInfo();
@@ -221,6 +225,17 @@ public:
   //     ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
   //   }
   // }
+
+  void timerCallback(const ros::TimerEvent& event)
+  {
+    sound_play::SoundRequest sound_req;
+    sound_req.sound = -3;
+    sound_req.command = 1;
+    sound_req.volume = 1.0;
+    sound_req.arg = "my name is drato, i'll get you!";
+    sound_req.arg2 = "voice_kal_diphone";
+    // sound_play_pub->publish(sound_req);
+  }
 
   /**
    * @brief Function to print information
@@ -358,7 +373,7 @@ public:
     float a;
     if (distance_closest_hunters > 1)
     {
-      a = angle_to_hunters[idx_closest_hunters] + M_PI;
+      a = angle_to_hunters[idx_closest_hunters] + M_PI/10;
       // marker.text = "RUNNING FROM " + team_hunters->player_names[idx_closest_hunters] + "!!!";
     }
     else
@@ -372,13 +387,6 @@ public:
     {
       a = a + M_PI / 10;
     }
-    sound_play::SoundRequest sound_req;
-    sound_req.sound=-3;
-    sound_req.command=1;
-    sound_req.volume=1.0;
-    sound_req.arg="my name is drato, nothing to say";
-    sound_req.arg2="voice_kal_diphone";
-    sound_play_pub->publish(sound_req);
 
     float dx = 10;
 
