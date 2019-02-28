@@ -159,7 +159,7 @@ public:
     (*sound_play_pub) = n.advertise<sound_play::SoundRequest>("/robotsound", 10);
 
     timer = (boost::shared_ptr<ros::Timer>)new ros::Timer;
-    (*timer) = n.createTimer(ros::Duration(5), &MyPlayer::timerCallback,this);
+    (*timer) = n.createTimer(ros::Duration(5), &MyPlayer::timerCallback, this);
 
     team_red->printInfo();
     team_green->printInfo();
@@ -226,7 +226,7 @@ public:
   //   }
   // }
 
-  void timerCallback(const ros::TimerEvent& event)
+  void timerCallback(const ros::TimerEvent &event)
   {
     sound_play::SoundRequest sound_req;
     sound_req.sound = -3;
@@ -328,6 +328,10 @@ public:
     // for each prey, find the closest. Then, follow it
     vector<float> distance_to_preys;
     vector<float> angle_to_preys;
+    float myangle;
+
+    std::tuple<float, float> tmine = getDistanceAndAngleToArena("drato");
+    myangle = std::get<1>(tmine);
 
     for (size_t i = 0; i < msg->red_alive.size(); i++)
     {
@@ -371,9 +375,9 @@ public:
     }
 
     float a;
-    if (distance_closest_hunters > 1)
+    if (distance_closest_hunters < 1.5)
     {
-      a = angle_to_hunters[idx_closest_hunters] + M_PI/10;
+      a = myangle + (myangle - angle_to_hunters[idx_closest_hunters]) + M_PI / 10;
       // marker.text = "RUNNING FROM " + team_hunters->player_names[idx_closest_hunters] + "!!!";
     }
     else
@@ -383,9 +387,9 @@ public:
     }
 
     std::tuple<float, float> t2 = getDistanceAndAngleToArena(player_name);
-    if (std::get<0>(t2) > 7.5)
+    if (std::get<0>(t2) > 7)
     {
-      a = a + M_PI / 10;
+      a = myangle + M_PI / 20;
     }
 
     float dx = 10;
